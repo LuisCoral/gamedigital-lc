@@ -101,16 +101,23 @@ export function useProducts() {
     fetchProducts()
   }, [fetchProducts])
 
+  function friendlyError(message: string, code?: string): string {
+    if (code === '23505' || message.includes('products_slug_key')) {
+      return 'Ya existe un juego con esa URL (slug). Cámbiala por otra, por ejemplo agregando la plataforma al final, y guarda de nuevo.'
+    }
+    return message
+  }
+
   async function createProduct(input: ProductInput) {
     const { error } = await supabase.from('products').insert(mapInputToRow(input))
     if (!error) await fetchProducts()
-    return { error: error?.message ?? null }
+    return { error: error ? friendlyError(error.message, error.code) : null }
   }
 
   async function updateProduct(id: string, input: ProductInput) {
     const { error } = await supabase.from('products').update(mapInputToRow(input)).eq('id', id)
     if (!error) await fetchProducts()
-    return { error: error?.message ?? null }
+    return { error: error ? friendlyError(error.message, error.code) : null }
   }
 
   async function deleteProduct(id: string) {
@@ -125,15 +132,26 @@ export function useProducts() {
     return { error: error?.message ?? null }
   }
 
-  // Recibe la lista de productos ya en el nuevo orden y guarda la
-  // posición (1, 2, 3...) de cada uno en Supabase.
+  // Recibe una lista de productos ya en el nuevo orden (puede ser el
+  // catálogo completo o solo los de una plataforma) y guarda el nuevo
+  // orden en Supabase. Reutiliza los mismos valores de "position" que
+  // ya tenían esos productos entre sí, solo que reacomodados — así, si
+  // solo estás reordenando una plataforma, no se altera el orden de
+  // las demás que no aparecen en esta lista.
   async function reorderProducts(orderedProducts: Product[]) {
+    const positions = orderedProducts.map((p) => p.position).sort((a, b) => a - b)
+    const reordered = orderedProducts.map((p, index) => ({ ...p, position: positions[index] }))
+
     // Actualización optimista: se ve el nuevo orden de inmediato en pantalla
     // mientras se guarda en la base de datos.
-    setProducts(orderedProducts.map((p, index) => ({ ...p, position: index + 1 })))
+    setProducts((current) =>
+      current
+        .map((p) => reordered.find((r) => r.id === p.id) ?? p)
+        .sort((a, b) => a.position - b.position),
+    )
 
-    const updates = orderedProducts.map((product, index) =>
-      supabase.from('products').update({ position: index + 1 }).eq('id', product.id),
+    const updates = reordered.map((product) =>
+      supabase.from('products').update({ position: product.position }).eq('id', product.id),
     )
     const results = await Promise.all(updates)
     const failed = results.find((r) => r.error)

@@ -1,11 +1,12 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Plus } from 'lucide-react'
 import AdminLayout from '../components/admin/AdminLayout'
 import AdminProducts from '../components/admin/AdminProducts'
 import AdminProductForm from '../components/admin/AdminProductForm'
 import AdminCategories from '../components/admin/AdminCategories'
 import { useProducts } from '../hooks/useProducts'
-import type { Product } from '../lib/types'
+import { PLATFORM_META, PLATFORMS } from '../lib/platforms'
+import type { Platform, Product } from '../lib/types'
 
 export default function AdminProductsPage() {
   const { products, loading, createProduct, updateProduct, deleteProduct, toggleAvailable, reorderProducts } =
@@ -15,8 +16,14 @@ export default function AdminProductsPage() {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
   const [pendingDelete, setPendingDelete] = useState<Product | null>(null)
   const [actionError, setActionError] = useState<string | null>(null)
+  const [platformFilter, setPlatformFilter] = useState<Platform | 'todos'>('todos')
 
   const nextPosition = products.length > 0 ? Math.max(...products.map((p) => p.position)) + 1 : 1
+
+  const visibleProducts = useMemo(
+    () => (platformFilter === 'todos' ? products : products.filter((p) => p.platform === platformFilter)),
+    [products, platformFilter],
+  )
 
   function openCreateForm() {
     setEditingProduct(null)
@@ -78,11 +85,49 @@ export default function AdminProductsPage() {
         <AdminCategories />
       </div>
 
+      <div className="flex flex-wrap items-center gap-2 mb-4">
+        <button
+          onClick={() => setPlatformFilter('todos')}
+          className={`text-sm px-3.5 py-1.5 rounded-full border transition-colors ${
+            platformFilter === 'todos'
+              ? 'bg-neon-cyan/15 border-neon-cyan text-neon-cyan'
+              : 'border-white/15 text-text-secondary hover:border-white/30'
+          }`}
+        >
+          Todos
+        </button>
+        {PLATFORMS.map((platform) => {
+          const meta = PLATFORM_META[platform]
+          const isActive = platformFilter === platform
+          return (
+            <button
+              key={platform}
+              onClick={() => setPlatformFilter(platform)}
+              className={`text-sm px-3.5 py-1.5 rounded-full border transition-colors ${
+                isActive ? '' : 'border-white/15 text-text-secondary hover:border-white/30'
+              }`}
+              style={
+                isActive
+                  ? { borderColor: meta.accent, color: meta.accent, backgroundColor: `${meta.accent}22` }
+                  : undefined
+              }
+            >
+              {meta.shortLabel}
+            </button>
+          )
+        })}
+      </div>
+      <p className="text-text-secondary text-xs mb-4">
+        {platformFilter === 'todos'
+          ? 'Arrastrando aquí reordenas el catálogo completo, mezclando todas las plataformas.'
+          : `Mostrando solo ${PLATFORM_META[platformFilter].label}. Arrastra para reordenar solo esta plataforma, sin afectar el orden de las demás.`}
+      </p>
+
       {loading ? (
         <p className="text-text-secondary text-sm">Cargando juegos...</p>
       ) : (
         <AdminProducts
-          products={products}
+          products={visibleProducts}
           onEdit={openEditForm}
           onDelete={setPendingDelete}
           onToggleAvailable={handleToggleAvailable}

@@ -45,8 +45,8 @@ export default function AdminProductForm({
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!slugTouched) setSlug(slugify(name))
-  }, [name, slugTouched])
+    if (!slugTouched) setSlug(slugify(`${name} ${platform}`))
+  }, [name, platform, slugTouched])
 
   async function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]

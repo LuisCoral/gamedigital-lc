@@ -114,7 +114,7 @@ export default function ProductDetails() {
             </span>
             <h1 className="font-display font-bold text-3xl mt-1 mb-4">{product.name}</h1>
 
-            <p className="text-text-secondary text-sm leading-relaxed mb-6">
+            <p className="text-text-secondary text-sm leading-relaxed mb-6 whitespace-pre-line">
               {product.description || 'Sin descripción disponible para este juego.'}
             </p>
 

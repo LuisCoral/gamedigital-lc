@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ChevronLeft, ChevronRight, Star, Plus } from 'lucide-react'
 import type { Product } from '../lib/types'
@@ -20,6 +20,7 @@ export default function FeaturedCarousel({
   const [paused, setPaused] = useState(false)
   const navigate = useNavigate()
   const count = products.length
+  const touchStartX = useRef<number | null>(null)
 
   useEffect(() => {
     if (paused || count <= 1) return
@@ -35,8 +36,34 @@ export default function FeaturedCarousel({
     setIndex(((i % count) + count) % count)
   }
 
+  // Deslizar con el dedo en celular: avanza o retrocede el carrusel.
+  function handleTouchStart(e: React.TouchEvent) {
+    touchStartX.current = e.touches[0].clientX
+    setPaused(true)
+  }
+
+  function handleTouchEnd(e: React.TouchEvent) {
+    if (touchStartX.current === null) return
+    const deltaX = e.changedTouches[0].clientX - touchStartX.current
+    const SWIPE_THRESHOLD = 40 // píxeles mínimos para contar como deslizamiento
+
+    if (deltaX > SWIPE_THRESHOLD) {
+      goTo(index - 1) // deslizó hacia la derecha -> anterior
+    } else if (deltaX < -SWIPE_THRESHOLD) {
+      goTo(index + 1) // deslizó hacia la izquierda -> siguiente
+    }
+
+    touchStartX.current = null
+    setPaused(false)
+  }
+
   return (
-    <div onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)}>
+    <div
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+    >
       <div
         className="relative h-[320px] sm:h-[400px] flex items-center justify-center select-none"
         style={{ perspective: '1400px' }}
