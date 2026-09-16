@@ -104,6 +104,7 @@ export default function FeaturedCarousel({
       ref={containerRef}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
+      className="overflow-hidden"
     >
       <div
         className="relative h-[320px] sm:h-[400px] flex items-center justify-center select-none"

@@ -6,4 +6,9 @@
 
 body {
   @apply bg-bg text-text-primary font-sans antialiased;
+  overflow-x: hidden; /* evita que cualquier elemento haga que la página se pueda arrastrar de lado a lado en celular */
+}
+
+html {
+  overflow-x: hidden;
 }
