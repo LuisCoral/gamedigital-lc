@@ -20,7 +20,7 @@ export default function FeaturedCarousel({
   const [paused, setPaused] = useState(false)
   const navigate = useNavigate()
   const count = products.length
-  const touchStartX = useRef<number | null>(null)
+  const containerRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
     if (paused || count <= 1) return
@@ -30,43 +30,84 @@ export default function FeaturedCarousel({
     return () => clearInterval(id)
   }, [paused, count, autoAdvanceMs])
 
-  if (count === 0) return null
-
   function goTo(i: number) {
     setIndex(((i % count) + count) % count)
   }
 
-  // Deslizar con el dedo en celular: avanza o retrocede el carrusel.
-  function handleTouchStart(e: React.TouchEvent) {
-    touchStartX.current = e.touches[0].clientX
-    setPaused(true)
-  }
+  // Deslizar con el dedo en celular: avanza o retrocede el carrusel, sin
+  // que la página se desplace verticalmente mientras lo haces. Se usa un
+  // listener nativo (no el de React) porque necesitamos poder bloquear
+  // el scroll de la página con preventDefault() en cuanto detectamos que
+  // el gesto es horizontal, y React marca sus eventos táctiles como
+  // "passive" por defecto, lo que no permite hacer eso.
+  useEffect(() => {
+    const el = containerRef.current
+    if (!el || count <= 1) return
 
-  function handleTouchEnd(e: React.TouchEvent) {
-    if (touchStartX.current === null) return
-    const deltaX = e.changedTouches[0].clientX - touchStartX.current
-    const SWIPE_THRESHOLD = 40 // píxeles mínimos para contar como deslizamiento
+    let startX = 0
+    let startY = 0
+    let isHorizontal: boolean | null = null // null = todavía no lo sabemos
 
-    if (deltaX > SWIPE_THRESHOLD) {
-      goTo(index - 1) // deslizó hacia la derecha -> anterior
-    } else if (deltaX < -SWIPE_THRESHOLD) {
-      goTo(index + 1) // deslizó hacia la izquierda -> siguiente
+    function onTouchStart(e: TouchEvent) {
+      startX = e.touches[0].clientX
+      startY = e.touches[0].clientY
+      isHorizontal = null
+      setPaused(true)
     }
 
-    touchStartX.current = null
-    setPaused(false)
-  }
+    function onTouchMove(e: TouchEvent) {
+      const deltaX = e.touches[0].clientX - startX
+      const deltaY = e.touches[0].clientY - startY
+
+      if (isHorizontal === null && (Math.abs(deltaX) > 8 || Math.abs(deltaY) > 8)) {
+        isHorizontal = Math.abs(deltaX) > Math.abs(deltaY)
+      }
+
+      // Ya sabemos que es un swipe horizontal: bloqueamos el scroll
+      // vertical de la página mientras dura este gesto.
+      if (isHorizontal) {
+        e.preventDefault()
+      }
+    }
+
+    function onTouchEnd(e: TouchEvent) {
+      const deltaX = e.changedTouches[0].clientX - startX
+      const SWIPE_THRESHOLD = 40
+
+      if (isHorizontal) {
+        if (deltaX > SWIPE_THRESHOLD) {
+          goTo(index - 1)
+        } else if (deltaX < -SWIPE_THRESHOLD) {
+          goTo(index + 1)
+        }
+      }
+
+      isHorizontal = null
+      setPaused(false)
+    }
+
+    el.addEventListener('touchstart', onTouchStart, { passive: true })
+    el.addEventListener('touchmove', onTouchMove, { passive: false })
+    el.addEventListener('touchend', onTouchEnd, { passive: true })
+
+    return () => {
+      el.removeEventListener('touchstart', onTouchStart)
+      el.removeEventListener('touchmove', onTouchMove)
+      el.removeEventListener('touchend', onTouchEnd)
+    }
+  }, [index, count])
+
+  if (count === 0) return null
 
   return (
     <div
+      ref={containerRef}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
     >
       <div
         className="relative h-[320px] sm:h-[400px] flex items-center justify-center select-none"
-        style={{ perspective: '1400px' }}
+        style={{ perspective: '1400px', touchAction: 'pan-y' }}
       >
         {products.map((product, i) => {
           let offset = i - index

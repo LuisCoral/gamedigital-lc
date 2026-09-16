@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import Header from '../components/Header'
 import CategoryCard from '../components/CategoryCard'
 import ProductGrid from '../components/ProductGrid'
@@ -19,8 +19,14 @@ export default function Home() {
   const [search, setSearch] = useState('')
   const [activePlatform, setActivePlatform] = useState<Platform | null>(null)
   const [cartOpen, setCartOpen] = useState(false)
-  const [page, setPage] = useState(1)
+  const [page, setPage] = useState(() => {
+    // Al volver de ver un juego, retoma la misma página del catálogo en
+    // la que ibas, en vez de reiniciar siempre en la página 1.
+    const saved = sessionStorage.getItem('gd_home_page')
+    return saved ? Number(saved) : 1
+  })
   const PAGE_SIZE = 20
+  const isFirstRender = useRef(true)
 
   const featured = useMemo(
     () => products.filter((p) => p.featured).sort((a, b) => a.position - b.position),
@@ -37,13 +43,32 @@ export default function Home() {
       .sort((a, b) => a.position - b.position)
   }, [products, search, activePlatform])
 
-  // Si cambia la búsqueda o el filtro de plataforma, siempre volvemos a la página 1
+  // Si cambia la búsqueda o el filtro de plataforma, volvemos a la
+  // página 1 — pero no la primera vez que se monta la página (ahí es
+  // cuando estamos restaurando la página guardada de la visita anterior).
   useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false
+      return
+    }
     setPage(1)
   }, [search, activePlatform])
 
+  // Guarda en qué página del catálogo vas, cada vez que cambia.
+  useEffect(() => {
+    sessionStorage.setItem('gd_home_page', String(page))
+  }, [page])
+
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
   const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+
+  // Por si el catálogo cambió de tamaño desde tu última visita y la
+  // página guardada ya no existe (ej. antes había 3 páginas y ahora solo hay 1).
+  useEffect(() => {
+    if (!loading && page > totalPages) {
+      setPage(totalPages)
+    }
+  }, [loading, page, totalPages])
 
   function handlePageChange(newPage: number) {
     setPage(newPage)

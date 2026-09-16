@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Plus } from 'lucide-react'
+import { Plus, Star } from 'lucide-react'
 import AdminLayout from '../components/admin/AdminLayout'
 import AdminProducts from '../components/admin/AdminProducts'
 import AdminProductForm from '../components/admin/AdminProductForm'
@@ -7,6 +7,8 @@ import AdminCategories from '../components/admin/AdminCategories'
 import { useProducts } from '../hooks/useProducts'
 import { PLATFORM_META, PLATFORMS } from '../lib/platforms'
 import type { Platform, Product } from '../lib/types'
+
+type ViewFilter = Platform | 'todos' | 'destacados'
 
 export default function AdminProductsPage() {
   const { products, loading, createProduct, updateProduct, deleteProduct, toggleAvailable, reorderProducts } =
@@ -16,14 +18,15 @@ export default function AdminProductsPage() {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
   const [pendingDelete, setPendingDelete] = useState<Product | null>(null)
   const [actionError, setActionError] = useState<string | null>(null)
-  const [platformFilter, setPlatformFilter] = useState<Platform | 'todos'>('todos')
+  const [viewFilter, setViewFilter] = useState<ViewFilter>('todos')
 
   const nextPosition = products.length > 0 ? Math.max(...products.map((p) => p.position)) + 1 : 1
 
-  const visibleProducts = useMemo(
-    () => (platformFilter === 'todos' ? products : products.filter((p) => p.platform === platformFilter)),
-    [products, platformFilter],
-  )
+  const visibleProducts = useMemo(() => {
+    if (viewFilter === 'todos') return products
+    if (viewFilter === 'destacados') return products.filter((p) => p.featured)
+    return products.filter((p) => p.platform === viewFilter)
+  }, [products, viewFilter])
 
   function openCreateForm() {
     setEditingProduct(null)
@@ -87,22 +90,33 @@ export default function AdminProductsPage() {
 
       <div className="flex flex-wrap items-center gap-2 mb-4">
         <button
-          onClick={() => setPlatformFilter('todos')}
+          onClick={() => setViewFilter('todos')}
           className={`text-sm px-3.5 py-1.5 rounded-full border transition-colors ${
-            platformFilter === 'todos'
+            viewFilter === 'todos'
               ? 'bg-neon-cyan/15 border-neon-cyan text-neon-cyan'
               : 'border-white/15 text-text-secondary hover:border-white/30'
           }`}
         >
           Todos
         </button>
+        <button
+          onClick={() => setViewFilter('destacados')}
+          className={`flex items-center gap-1.5 text-sm px-3.5 py-1.5 rounded-full border transition-colors ${
+            viewFilter === 'destacados'
+              ? 'bg-neon-cyan/15 border-neon-cyan text-neon-cyan'
+              : 'border-white/15 text-text-secondary hover:border-white/30'
+          }`}
+        >
+          <Star className={`w-3.5 h-3.5 ${viewFilter === 'destacados' ? 'fill-neon-cyan' : ''}`} />
+          Destacados
+        </button>
         {PLATFORMS.map((platform) => {
           const meta = PLATFORM_META[platform]
-          const isActive = platformFilter === platform
+          const isActive = viewFilter === platform
           return (
             <button
               key={platform}
-              onClick={() => setPlatformFilter(platform)}
+              onClick={() => setViewFilter(platform)}
               className={`text-sm px-3.5 py-1.5 rounded-full border transition-colors ${
                 isActive ? '' : 'border-white/15 text-text-secondary hover:border-white/30'
               }`}
@@ -118,10 +132,21 @@ export default function AdminProductsPage() {
         })}
       </div>
       <p className="text-text-secondary text-xs mb-4">
-        {platformFilter === 'todos'
-          ? 'Arrastrando aquí reordenas el catálogo completo, mezclando todas las plataformas.'
-          : `Mostrando solo ${PLATFORM_META[platformFilter].label}. Arrastra para reordenar solo esta plataforma, sin afectar el orden de las demás.`}
+        {viewFilter === 'todos' &&
+          'Arrastrando aquí reordenas el catálogo completo, mezclando todas las plataformas.'}
+        {viewFilter === 'destacados' &&
+          'Mostrando solo los juegos marcados como Destacado. Arrastra para cambiar el orden en que aparecen en el carrusel de la página principal.'}
+        {viewFilter !== 'todos' &&
+          viewFilter !== 'destacados' &&
+          `Mostrando solo ${PLATFORM_META[viewFilter].label}. Arrastra para reordenar solo esta plataforma, sin afectar el orden de las demás.`}
       </p>
+
+      {viewFilter === 'destacados' && visibleProducts.length === 0 && (
+        <p className="text-text-secondary text-sm mb-4">
+          Todavía no tienes juegos marcados como Destacado. Edita un juego y activa la casilla
+          "Destacado" para que aparezca aquí y en el carrusel.
+        </p>
+      )}
 
       {loading ? (
         <p className="text-text-secondary text-sm">Cargando juegos...</p>
