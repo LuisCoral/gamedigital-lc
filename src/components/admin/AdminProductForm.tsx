@@ -96,9 +96,9 @@ export default function AdminProductForm({
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-bg/80 backdrop-blur-sm flex items-start sm:items-center justify-center p-4 overflow-y-auto">
-      <div className="w-full max-w-lg bg-surface border border-white/10 rounded-xl my-8">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
+    <div className="fixed inset-0 z-50 bg-bg/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
+      <div className="w-full max-w-3xl max-h-[92vh] flex flex-col bg-surface border border-white/10 rounded-xl">
+        <div className="shrink-0 flex items-center justify-between px-5 py-3 border-b border-white/10">
           <h2 className="font-display font-bold text-lg">
             {isEditing ? 'Editar juego' : 'Nuevo juego'}
           </h2>
@@ -107,7 +107,11 @@ export default function AdminProductForm({
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="px-6 py-5 flex flex-col gap-4">
+        <form
+          id="product-form"
+          onSubmit={handleSubmit}
+          className="flex-1 overflow-y-auto px-5 py-4 grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-3 content-start"
+        >
           <div className="flex flex-col gap-1.5">
             <label className="text-xs text-text-secondary">Nombre</label>
             <input
@@ -148,6 +152,17 @@ export default function AdminProductForm({
           </div>
 
           <div className="flex flex-col gap-1.5">
+            <label className="text-xs text-text-secondary">Posición en el catálogo</label>
+            <input
+              type="number"
+              min="0"
+              value={position}
+              onChange={(e) => setPosition(Number(e.target.value))}
+              className="bg-bg border border-white/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-neon-cyan/50 w-full"
+            />
+          </div>
+
+          <div className="flex flex-col gap-1.5 sm:col-span-2">
             <label className="text-xs text-text-secondary">
               Categorías {selectedCategories.length > 0 && `(${selectedCategories.length} seleccionadas)`}
             </label>
@@ -186,12 +201,12 @@ export default function AdminProductForm({
             </p>
           </div>
 
-          <div className="flex flex-col gap-1.5">
+          <div className="flex flex-col gap-1.5 sm:col-span-2">
             <label className="text-xs text-text-secondary">Descripción</label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              rows={3}
+              rows={2}
               className="bg-bg border border-white/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-neon-cyan/50 resize-none"
             />
           </div>
@@ -229,7 +244,7 @@ export default function AdminProductForm({
             )}
           </div>
 
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-3 gap-3 sm:col-span-2">
             <div className="flex flex-col gap-1.5">
               <label className="text-xs text-text-secondary">Precio</label>
               <input
@@ -264,18 +279,7 @@ export default function AdminProductForm({
             </div>
           </div>
 
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs text-text-secondary">Posición en el catálogo</label>
-            <input
-              type="number"
-              min="0"
-              value={position}
-              onChange={(e) => setPosition(Number(e.target.value))}
-              className="bg-bg border border-white/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-neon-cyan/50 w-32"
-            />
-          </div>
-
-          <div className="flex flex-col gap-1.5 border-t border-white/10 pt-4">
+          <div className="flex flex-col gap-1.5 border-t border-white/10 pt-3 sm:col-span-2">
             <label className="text-xs text-text-secondary">
               Precio cuenta secundaria (opcional)
             </label>
@@ -292,7 +296,7 @@ export default function AdminProductForm({
             </p>
           </div>
 
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-6 sm:col-span-2">
             <label className="flex items-center gap-2 text-sm cursor-pointer">
               <input
                 type="checkbox"
@@ -313,25 +317,26 @@ export default function AdminProductForm({
             </label>
           </div>
 
-          {error && <p className="text-xs text-neon-magenta">{error}</p>}
+          {error && <p className="text-xs text-neon-magenta sm:col-span-2">{error}</p>}
 
-          <div className="flex items-center gap-3 mt-2">
-            <button
-              type="submit"
-              disabled={saving || uploading}
-              className="bg-neon-cyan text-bg font-semibold rounded-lg px-5 py-2.5 text-sm hover:brightness-110 disabled:opacity-50 transition"
-            >
-              {saving ? 'Guardando...' : isEditing ? 'Guardar cambios' : 'Crear juego'}
-            </button>
-            <button
-              type="button"
-              onClick={onClose}
-              className="text-sm text-text-secondary hover:text-text-primary"
-            >
-              Cancelar
-            </button>
-          </div>
         </form>
+        <div className="shrink-0 flex items-center gap-3 px-5 py-3 border-t border-white/10">
+          <button
+            type="submit"
+            form="product-form"
+            disabled={saving || uploading}
+            className="bg-neon-cyan text-bg font-semibold rounded-lg px-5 py-2.5 text-sm hover:brightness-110 disabled:opacity-50 transition"
+          >
+            {saving ? 'Guardando...' : isEditing ? 'Guardar cambios' : 'Crear juego'}
+          </button>
+          <button
+            type="button"
+            onClick={onClose}
+            className="text-sm text-text-secondary hover:text-text-primary"
+          >
+            Cancelar
+          </button>
+        </div>
       </div>
     </div>
   )
