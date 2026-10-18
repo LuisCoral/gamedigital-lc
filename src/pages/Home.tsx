@@ -79,10 +79,23 @@ export default function Home() {
     }
   }, [loading, page, totalPages])
 
+  // Al cambiar de página con los botones, sube al inicio del catálogo.
+  // Se hace DESPUÉS de renderizar la nueva página: si se hace antes, el
+  // alto del documento cambia y el navegador te deja al final.
+  const scrollToCatalog = useRef(false)
+
   function handlePageChange(newPage: number) {
+    scrollToCatalog.current = true
     setPage(newPage)
-    document.getElementById('catalogo')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
+
+  useEffect(() => {
+    if (!scrollToCatalog.current) return
+    scrollToCatalog.current = false
+    requestAnimationFrame(() => {
+      document.getElementById('catalogo')?.scrollIntoView({ behavior: 'auto', block: 'start' })
+    })
+  }, [page])
 
   const countByPlatform = (platform: Platform) =>
     products.filter((p) => p.platform === platform).length
@@ -165,7 +178,7 @@ export default function Home() {
           </p>
         ) : (
           <>
-            <section id="catalogo" className="max-w-6xl mx-auto px-5 pb-20">
+            <section id="catalogo" className="scroll-mt-32 md:scroll-mt-20 max-w-6xl mx-auto px-5 pb-20">
               <div className="flex items-center justify-between mb-1">
                 <h2 className="font-display font-bold text-2xl">
                   {activePlatform ? `Catálogo ${activePlatform}` : 'Catálogo completo'}
