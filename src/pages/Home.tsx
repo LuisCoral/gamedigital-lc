@@ -17,7 +17,11 @@ export default function Home() {
   const cart = useCart()
 
   const [search, setSearch] = useState('')
-  const [activePlatform, setActivePlatform] = useState<Platform | null>(null)
+  const [activePlatform, setActivePlatform] = useState<Platform | null>(() => {
+    // Recuerda la plataforma filtrada al volver de ver un juego.
+    const saved = sessionStorage.getItem('gd_home_platform')
+    return saved && (PLATFORMS as string[]).includes(saved) ? (saved as Platform) : null
+  })
   const [cartOpen, setCartOpen] = useState(false)
   const [page, setPage] = useState(() => {
     // Al volver de ver un juego, retoma la misma página del catálogo en
@@ -53,6 +57,11 @@ export default function Home() {
     }
     setPage(1)
   }, [search, activePlatform])
+
+  useEffect(() => {
+    if (activePlatform) sessionStorage.setItem('gd_home_platform', activePlatform)
+    else sessionStorage.removeItem('gd_home_platform')
+  }, [activePlatform])
 
   // Guarda en qué página del catálogo vas, cada vez que cambia.
   useEffect(() => {

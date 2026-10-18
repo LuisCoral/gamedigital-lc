@@ -1,6 +1,5 @@
-import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Search, ShoppingCart, Menu, X } from 'lucide-react'
+import { Search, ShoppingCart } from 'lucide-react'
 import { PLATFORM_META, PLATFORMS } from '../lib/platforms'
 import { LOGO_URL } from '../lib/assets'
 
@@ -11,8 +10,6 @@ interface HeaderProps {
 }
 
 export default function Header({ cartCount = 0, onSearch, onOpenCart }: HeaderProps) {
-  const [menuOpen, setMenuOpen] = useState(false)
-
   return (
     <header className="sticky top-0 z-40 bg-bg/90 backdrop-blur border-b border-white/5">
       <div className="max-w-6xl mx-auto px-5 h-16 flex items-center gap-6">
@@ -46,7 +43,7 @@ export default function Header({ cartCount = 0, onSearch, onOpenCart }: HeaderPr
         </nav>
 
         <button
-          className="relative p-2 rounded-full hover:bg-surface transition-colors md:ml-2"
+          className="relative p-2 rounded-full hover:bg-surface transition-colors ml-auto md:ml-2"
           aria-label="Carrito"
           onClick={onOpenCart}
         >
@@ -58,37 +55,20 @@ export default function Header({ cartCount = 0, onSearch, onOpenCart }: HeaderPr
           )}
         </button>
 
-        <button
-          className="md:hidden p-2 rounded-full hover:bg-surface transition-colors"
-          onClick={() => setMenuOpen((v) => !v)}
-          aria-label="Menú"
-        >
-          {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-        </button>
       </div>
 
-      {menuOpen && (
-        <div className="md:hidden border-t border-white/5 px-5 py-4 flex flex-col gap-4">
-          <div className="flex items-center relative">
-            <Search className="w-4 h-4 text-text-secondary absolute left-3" />
-            <input
-              type="text"
-              placeholder="Buscar un juego..."
-              onChange={(e) => onSearch?.(e.target.value)}
-              className="w-full bg-surface border border-white/10 rounded-full py-2 pl-9 pr-4 text-sm placeholder:text-text-secondary focus:outline-none focus:border-neon-cyan/50"
-            />
-          </div>
-          {PLATFORMS.map((platform) => (
-            <a
-              key={platform}
-              href={`#${platform.toLowerCase()}`}
-              className="text-sm text-text-secondary hover:text-neon-cyan"
-              onClick={() => setMenuOpen(false)}
-            >
-              {PLATFORM_META[platform].shortLabel}
-            </a>
-          ))}
+      {onSearch && (
+      <div className="md:hidden px-5 pb-3">
+        <div className="flex items-center relative">
+          <Search className="w-4 h-4 text-text-secondary absolute left-3" />
+          <input
+            type="text"
+            placeholder="Buscar un juego..."
+            onChange={(e) => onSearch?.(e.target.value)}
+            className="w-full bg-surface border border-white/10 rounded-full py-2 pl-9 pr-4 text-sm placeholder:text-text-secondary focus:outline-none focus:border-neon-cyan/50"
+          />
         </div>
+      </div>
       )}
     </header>
   )
