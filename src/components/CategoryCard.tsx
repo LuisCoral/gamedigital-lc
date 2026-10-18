@@ -36,21 +36,29 @@ export default function CategoryCard({ platform, count, onClick }: CategoryCardP
       </span>
       <span className="text-sm text-text-secondary mt-auto">{count} juegos disponibles</span>
 
-      {/* Reveal: aparece al pasar el mouse (o al tocar en celular) */}
+      {/* Reveal: aparece al pasar el mouse (o al tocar en celular).
+          El fondo toma el color del propio logo, así la imagen se funde
+          con la tarjeta sin bordes ni recortes. */}
       <div
-        className={`absolute inset-0 flex items-center justify-center px-4 text-center transition-all duration-300 ${
+        className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ${
           revealed ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
-        style={{
-          background: `linear-gradient(160deg, ${meta.accent}ee 0%, #050505ee 100%)`,
-        }}
+        style={{ backgroundColor: meta.logoBg }}
       >
-        <div className="flex flex-col items-center gap-2">
-          <Icon className="w-8 h-8 text-white" strokeWidth={1.5} />
-          <span className="font-display font-bold text-2xl text-white leading-tight">
-            {meta.label}
-          </span>
-        </div>
+        <img
+          src={meta.logo}
+          alt={meta.label}
+          loading="lazy"
+          draggable={false}
+          className={`h-full w-auto max-w-full object-contain select-none transition-transform duration-500 ease-out ${
+            revealed ? 'scale-100' : 'scale-90'
+          }`}
+          style={{
+            WebkitMaskImage:
+              'linear-gradient(to right, transparent, #000 4%, #000 96%, transparent)',
+            maskImage: 'linear-gradient(to right, transparent, #000 4%, #000 96%, transparent)',
+          }}
+        />
       </div>
     </button>
   )
