@@ -5,20 +5,24 @@ import { PLATFORM_META } from '../lib/platforms'
 interface CategoryCardProps {
   platform: Platform
   count: number
+  active?: boolean // la plataforma que se está viendo en el catálogo
   onClick?: () => void
 }
 
-export default function CategoryCard({ platform, count, onClick }: CategoryCardProps) {
+export default function CategoryCard({ platform, count, active = false, onClick }: CategoryCardProps) {
   const meta = PLATFORM_META[platform]
   const Icon = meta.icon
-  const [revealed, setRevealed] = useState(false)
+  // Hover solo con mouse. En celular el logo depende de la plataforma
+  // seleccionada (active), así que hacer scroll no lo activa por accidente
+  // y al elegir otra plataforma el anterior se cierra solo.
+  const [hovered, setHovered] = useState(false)
+  const revealed = active || hovered
 
   return (
     <button
       onClick={onClick}
-      onMouseEnter={() => setRevealed(true)}
-      onMouseLeave={() => setRevealed(false)}
-      onTouchStart={() => setRevealed((v) => !v)}
+      onPointerEnter={(e) => e.pointerType === 'mouse' && setHovered(true)}
+      onPointerLeave={() => setHovered(false)}
       className="group relative text-left bg-surface border border-white/10 hover:border-white/20 transition-colors p-6 flex flex-col gap-3 min-h-[140px] overflow-hidden"
       style={{ clipPath: 'polygon(0 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%)' }}
     >

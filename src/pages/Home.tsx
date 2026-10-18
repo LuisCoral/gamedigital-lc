@@ -164,6 +164,7 @@ export default function Home() {
                 key={platform}
                 platform={platform}
                 count={countByPlatform(platform)}
+                active={activePlatform === platform}
                 onClick={() =>
                   setActivePlatform((current) => (current === platform ? null : platform))
                 }
