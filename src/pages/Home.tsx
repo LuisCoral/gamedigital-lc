@@ -146,7 +146,7 @@ export default function Home() {
           </div>
         )}
 
-        {featured.length > 0 && !activePlatform && !search && (
+        {featured.length > 0 && !search && (
           <section className="max-w-6xl mx-auto px-5 pt-12 pb-4">
             <h2 className="font-display font-bold text-2xl mb-2">Destacados</h2>
             <p className="text-text-secondary text-sm mb-2">
