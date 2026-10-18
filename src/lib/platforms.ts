@@ -19,7 +19,7 @@ export const PLATFORM_META: Record<Platform, PlatformMeta> = {
     accent: '#0070D1', // azul PlayStation clásico
     icon: Gamepad2,
     logo: logoUrl('ps4.webp'),
-    logoBg: '#054697',
+    logoBg: '#004098',
   },
   PS5: {
     label: 'PlayStation 5',
