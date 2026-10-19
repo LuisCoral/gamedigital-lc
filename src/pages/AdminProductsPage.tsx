@@ -1,8 +1,9 @@
 import { useMemo, useState } from 'react'
-import { Plus, Star } from 'lucide-react'
+import { Plus, Star, Upload } from 'lucide-react'
 import AdminLayout from '../components/admin/AdminLayout'
 import AdminProducts from '../components/admin/AdminProducts'
 import AdminProductForm from '../components/admin/AdminProductForm'
+import AdminBulkImport from '../components/admin/AdminBulkImport'
 import AdminCategories from '../components/admin/AdminCategories'
 import { useProducts } from '../hooks/useProducts'
 import { PLATFORM_META, PLATFORMS } from '../lib/platforms'
@@ -15,6 +16,7 @@ export default function AdminProductsPage() {
     useProducts()
 
   const [formOpen, setFormOpen] = useState(false)
+  const [bulkOpen, setBulkOpen] = useState(false)
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
   const [pendingDelete, setPendingDelete] = useState<Product | null>(null)
   const [actionError, setActionError] = useState<string | null>(null)
@@ -66,6 +68,14 @@ export default function AdminProductsPage() {
     <AdminLayout>
       <div className="flex items-center justify-between mb-1">
         <h1 className="font-display font-bold text-2xl">Juegos</h1>
+        <div className="flex items-center gap-2">
+        <button
+          onClick={() => setBulkOpen(true)}
+          className="flex items-center gap-1.5 border border-white/15 rounded-lg px-4 py-2 text-sm hover:border-neon-cyan/50 transition-colors"
+        >
+          <Upload className="w-4 h-4" />
+          Carga masiva
+        </button>
         <button
           onClick={openCreateForm}
           className="flex items-center gap-1.5 bg-neon-cyan text-bg font-semibold rounded-lg px-4 py-2 text-sm hover:brightness-110 transition"
@@ -73,6 +83,7 @@ export default function AdminProductsPage() {
           <Plus className="w-4 h-4" />
           Nuevo juego
         </button>
+        </div>
       </div>
       <p className="text-text-secondary text-sm mb-6">
         {products.length} juego{products.length !== 1 ? 's' : ''} en el catálogo.
@@ -166,6 +177,15 @@ export default function AdminProductsPage() {
           nextPosition={nextPosition}
           onSave={handleSave}
           onClose={() => setFormOpen(false)}
+        />
+      )}
+
+      {bulkOpen && (
+        <AdminBulkImport
+          products={products}
+          nextPosition={nextPosition}
+          onCreate={createProduct}
+          onClose={() => setBulkOpen(false)}
         />
       )}
 
