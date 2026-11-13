@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight, Star, Plus } from 'lucide-react'
 import type { Product } from '../lib/types'
 import { PLATFORM_META } from '../lib/platforms'
 import { formatPrice } from '../utils/formatPrice'
+import { lowestPrice } from '../utils/pricing'
 
 interface FeaturedCarouselProps {
   products: Product[]
@@ -188,7 +189,12 @@ export default function FeaturedCarousel({
                       {meta.shortLabel}
                     </span>
                     <h3 className="text-sm font-medium leading-snug line-clamp-1">{product.name}</h3>
-                    <p className="text-base font-semibold mt-1">{formatPrice(product.price)}</p>
+                    <p className="text-base font-semibold mt-1">
+                      {lowestPrice(product).isSecondary && (
+                        <span className="text-[11px] font-normal text-text-secondary mr-1.5">Desde</span>
+                      )}
+                      {formatPrice(lowestPrice(product).price)}
+                    </p>
                   </div>
                 )}
               </div>

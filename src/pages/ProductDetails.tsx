@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { ArrowLeft, MessageCircle, ShoppingCart, Minus, Plus, Star } from 'lucide-react'
 import Header from '../components/Header'
@@ -10,6 +10,7 @@ import { useCart } from '../hooks/useCart'
 import { PLATFORM_META } from '../lib/platforms'
 import type { AccountType } from '../lib/types'
 import { formatPrice } from '../utils/formatPrice'
+import { lowestPrice } from '../utils/pricing'
 import { buildProductWhatsAppMessage, buildWhatsAppLink } from '../utils/whatsapp'
 
 export default function ProductDetails() {
@@ -21,6 +22,12 @@ export default function ProductDetails() {
   const [accountType, setAccountType] = useState<AccountType>('principal')
   const [quantity, setQuantity] = useState(1)
   const [cartOpen, setCartOpen] = useState(false)
+  const accountTouched = useRef(false)
+
+  // Al cargar el juego, deja seleccionada la cuenta más económica.
+  useEffect(() => {
+    if (product && !accountTouched.current) setAccountType(lowestPrice(product).accountType)
+  }, [product])
 
   if (loading) {
     return (
@@ -121,21 +128,12 @@ export default function ProductDetails() {
             <div className="flex flex-col gap-2 mb-6">
               <span className="text-xs text-text-secondary">Tipo de cuenta</span>
               <div className="flex flex-col sm:flex-row gap-3">
-                <button
-                  onClick={() => setAccountType('principal')}
-                  className={`flex-1 text-left border rounded-xl px-4 py-3 transition-colors ${
-                    accountType === 'principal'
-                      ? 'border-neon-cyan bg-neon-cyan/5'
-                      : 'border-white/10 hover:border-white/25'
-                  }`}
-                >
-                  <p className="text-sm font-medium">Cuenta principal</p>
-                  <p className="text-base font-semibold mt-2">{formatPrice(product.price)}</p>
-                </button>
-
                 {hasSecondary && (
                   <button
-                    onClick={() => setAccountType('secundaria')}
+                    onClick={() => {
+                      accountTouched.current = true
+                      setAccountType('secundaria')
+                    }}
                     className={`flex-1 text-left border rounded-xl px-4 py-3 transition-colors ${
                       accountType === 'secundaria'
                         ? 'border-neon-cyan bg-neon-cyan/5'
@@ -148,6 +146,20 @@ export default function ProductDetails() {
                     </p>
                   </button>
                 )}
+                <button
+                  onClick={() => {
+                    accountTouched.current = true
+                    setAccountType('principal')
+                  }}
+                  className={`flex-1 text-left border rounded-xl px-4 py-3 transition-colors ${
+                    accountType === 'principal'
+                      ? 'border-neon-cyan bg-neon-cyan/5'
+                      : 'border-white/10 hover:border-white/25'
+                  }`}
+                >
+                  <p className="text-sm font-medium">Cuenta principal</p>
+                  <p className="text-base font-semibold mt-2">{formatPrice(product.price)}</p>
+                </button>
               </div>
             </div>
 

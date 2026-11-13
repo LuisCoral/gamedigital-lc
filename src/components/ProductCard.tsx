@@ -3,6 +3,7 @@ import { Star, Plus } from 'lucide-react'
 import type { Product } from '../lib/types'
 import { PLATFORM_META } from '../lib/platforms'
 import { formatPrice } from '../utils/formatPrice'
+import { lowestPrice } from '../utils/pricing'
 
 interface ProductCardProps {
   product: Product
@@ -14,6 +15,7 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
   const accent = meta.accent
   const Icon = meta.icon
   const navigate = useNavigate()
+  const cheapest = lowestPrice(product)
 
   return (
     <div
@@ -70,12 +72,16 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
 
         <div className="mt-auto flex items-end justify-between pt-2">
           <div className="flex flex-col">
-            {product.oldPrice && (
-              <span className="text-xs text-text-secondary line-through">
-                {formatPrice(product.oldPrice)}
-              </span>
+            {cheapest.isSecondary ? (
+              <span className="text-[11px] text-text-secondary">Desde · cuenta secundaria</span>
+            ) : (
+              product.oldPrice && (
+                <span className="text-xs text-text-secondary line-through">
+                  {formatPrice(product.oldPrice)}
+                </span>
+              )
             )}
-            <span className="text-base font-semibold">{formatPrice(product.price)}</span>
+            <span className="text-base font-semibold">{formatPrice(cheapest.price)}</span>
           </div>
 
           <button

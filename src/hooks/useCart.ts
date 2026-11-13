@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import type { AccountType, Product } from '../lib/types'
+import { lowestPrice } from '../utils/pricing'
 
 export interface CartItem {
   product: Product
@@ -40,7 +41,8 @@ export function useCart() {
   }, [items])
 
   const addItem = useCallback(
-    (product: Product, accountType: AccountType = 'principal', quantity = 1) => {
+    (product: Product, requestedType?: AccountType, quantity = 1) => {
+      const accountType = requestedType ?? lowestPrice(product).accountType
       setItems((current) => {
         const existing = current.find((item) => sameLine(item, product.id, accountType))
         if (existing) {
