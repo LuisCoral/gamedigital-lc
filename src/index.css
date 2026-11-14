@@ -12,3 +12,32 @@ body {
 html {
   overflow-x: hidden;
 }
+
+/* ---------- Banner de promoción ---------- */
+@keyframes promo-marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+@keyframes promo-shine {
+  from { transform: translateX(-120%); }
+  to { transform: translateX(420%); }
+}
+@keyframes promo-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+}
+@keyframes promo-glow {
+  0%, 100% { box-shadow: 0 0 14px rgba(228, 0, 15, 0.35); }
+  50% { box-shadow: 0 0 26px rgba(228, 0, 15, 0.65); }
+}
+.promo-marquee { animation: promo-marquee 28s linear infinite; }
+.promo-shine { animation: promo-shine 4.5s ease-in-out infinite; }
+.promo-pulse { animation: promo-pulse 1.8s ease-in-out infinite; }
+.promo-glow { animation: promo-glow 2.8s ease-in-out infinite; }
+.promo-mask {
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 4%, #000 96%, transparent);
+  mask-image: linear-gradient(to right, transparent, #000 4%, #000 96%, transparent);
+}
+@media (prefers-reduced-motion: reduce) {
+  .promo-marquee, .promo-shine, .promo-pulse, .promo-glow { animation: none; }
+}

@@ -3,6 +3,7 @@ import Header from '../components/Header'
 import CategoryCard from '../components/CategoryCard'
 import ProductGrid from '../components/ProductGrid'
 import Pagination from '../components/Pagination'
+import PromoBanner from '../components/PromoBanner'
 import FeaturedCarousel from '../components/FeaturedCarousel'
 import Footer from '../components/Footer'
 import WhatsAppButton from '../components/WhatsAppButton'
@@ -137,6 +138,8 @@ export default function Home() {
     <div className="min-h-screen flex flex-col">
       <Header onSearch={setSearch} cartCount={cart.count} onOpenCart={() => setCartOpen(true)} />
       <main className="flex-1">
+        <PromoBanner />
+
         {error && (
           <div className="max-w-6xl mx-auto px-5 mt-8">
             <div className="border border-neon-magenta/40 bg-neon-magenta/5 text-sm text-neon-magenta rounded-lg px-4 py-3">

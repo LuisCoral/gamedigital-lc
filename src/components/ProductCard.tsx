@@ -73,7 +73,7 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
         <div className="mt-auto flex items-end justify-between pt-2">
           <div className="flex flex-col">
             {cheapest.isSecondary ? (
-              <span className="text-[11px] text-text-secondary">Desde · cuenta secundaria</span>
+              <span className="text-[11px] text-text-secondary">Desde</span>
             ) : (
               product.oldPrice && (
                 <span className="text-xs text-text-secondary line-through">
