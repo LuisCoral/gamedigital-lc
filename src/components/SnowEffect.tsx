@@ -38,17 +38,37 @@ export default function SnowEffect() {
       alpha: 0.45 + Math.random() * 0.45,
     })
 
-    function resize() {
+    // En celular, al hacer scroll la barra del navegador se oculta y cambia
+    // el alto de la ventana. Antes eso reiniciaba la nieve. Ahora solo se
+    // reinician los copos si cambia el ANCHO (girar el teléfono, redimensionar);
+    // el alto solo crece, nunca se encoge, y los copos siguen cayendo igual.
+    function setup(resetFlakes: boolean) {
       const dpr = Math.min(window.devicePixelRatio || 1, 2)
-      width = window.innerWidth
-      height = window.innerHeight
-      canvas!.width = width * dpr
-      canvas!.height = height * dpr
-      canvas!.style.width = `${width}px`
-      canvas!.style.height = `${height}px`
-      ctx!.setTransform(dpr, 0, 0, dpr, 0, 0)
-      const count = width < 640 ? 35 : 80
-      flakes = Array.from({ length: count }, () => makeFlake(true))
+      const newWidth = window.innerWidth
+      const newHeight = Math.max(window.innerHeight, height)
+      const sizeChanged = newWidth !== width || newHeight !== height
+      width = newWidth
+      height = newHeight
+      if (sizeChanged) {
+        canvas!.width = Math.round(width * dpr)
+        canvas!.height = Math.round(height * dpr)
+        canvas!.style.width = `${width}px`
+        canvas!.style.height = `${height}px`
+        ctx!.setTransform(dpr, 0, 0, dpr, 0, 0)
+      }
+      if (resetFlakes) {
+        const count = width < 640 ? 35 : 80
+        flakes = Array.from({ length: count }, () => makeFlake(true))
+      }
+    }
+
+    function resize() {
+      if (window.innerWidth !== width) {
+        height = 0 // cambió el ancho de verdad: se recalcula todo
+        setup(true)
+      } else if (window.innerHeight > height) {
+        setup(false) // solo creció el alto: se amplía el lienzo, sin reiniciar
+      }
     }
 
     function frame(time: number) {
@@ -76,7 +96,7 @@ export default function SnowEffect() {
       }
     }
 
-    resize()
+    setup(true)
     window.addEventListener('resize', resize)
     document.addEventListener('visibilitychange', onVisibility)
     raf = requestAnimationFrame(frame)
@@ -92,7 +112,8 @@ export default function SnowEffect() {
     <canvas
       ref={canvasRef}
       aria-hidden="true"
-      className="pointer-events-none fixed inset-0 z-[45]"
+      className="pointer-events-none fixed left-0 top-0 z-[45]"
+      style={{ transform: 'translateZ(0)' }}
     />
   )
 }
