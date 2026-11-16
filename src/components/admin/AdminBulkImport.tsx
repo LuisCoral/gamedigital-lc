@@ -189,7 +189,17 @@ export default function AdminBulkImport({ products, nextPosition, onCreate, onCl
                     {r.status === 'error' && <AlertCircle className="w-4 h-4 text-neon-magenta" />}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="truncate">{r.name}</p>
+                    {r.status === 'pendiente' || r.status === 'error' ? (
+                      <input
+                        value={r.name}
+                        disabled={running}
+                        onChange={(e) => patch(i, { name: e.target.value })}
+                        className="w-full bg-bg border border-white/10 rounded px-2 py-1 text-sm"
+                        aria-label="Nombre del juego"
+                      />
+                    ) : (
+                      <p className="truncate">{r.name}</p>
+                    )}
                     <p className="text-[11px] text-text-secondary truncate">
                       {r.categories.length > 0 ? r.categories.join(' · ') : 'Sin categorías'}
                       {r.message && ` — ${r.message}`}
