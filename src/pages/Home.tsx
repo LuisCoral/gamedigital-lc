@@ -42,9 +42,9 @@ export default function Home() {
   const filtered = useMemo(() => {
     return products
       .filter((p) => {
-        const matchesSearch = matchesSearch(p.name, search)
+        const nameMatches = matchesSearch(p.name, search)
         const matchesPlatform = activePlatform ? p.platform === activePlatform : true
-        return matchesSearch && matchesPlatform
+        return nameMatches && matchesPlatform
       })
       .sort((a, b) => a.position - b.position)
   }, [products, search, activePlatform])
