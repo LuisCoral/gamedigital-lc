@@ -139,7 +139,7 @@ export default function Home() {
     <div className="min-h-screen flex flex-col">
       <Header onSearch={setSearch} cartCount={cart.count} onOpenCart={() => setCartOpen(true)} />
       <main className="flex-1">
-        <PromoBanner />
+        {!search && <PromoBanner />}
 
         {error && (
           <div className="max-w-6xl mx-auto px-5 mt-8">
@@ -160,6 +160,9 @@ export default function Home() {
           </section>
         )}
 
+        {/* Al buscar se ocultan los bloques de arriba para que los resultados
+            aparezcan de inmediato, sin tener que bajar. */}
+        {!search && (
         <section className="max-w-6xl mx-auto px-5 py-14">
           <h2 className="font-display font-bold text-2xl mb-6">Elige tu plataforma</h2>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -176,6 +179,7 @@ export default function Home() {
             ))}
           </div>
         </section>
+        )}
 
         {loading ? (
           <p className="max-w-6xl mx-auto px-5 text-text-secondary text-sm pb-14">
@@ -183,10 +187,17 @@ export default function Home() {
           </p>
         ) : (
           <>
-            <section id="catalogo" className="scroll-mt-32 md:scroll-mt-20 max-w-6xl mx-auto px-5 pb-20">
+            <section
+              id="catalogo"
+              className={`scroll-mt-32 md:scroll-mt-20 max-w-6xl mx-auto px-5 pb-20 ${search ? 'pt-6' : ''}`}
+            >
               <div className="flex items-center justify-between mb-1">
                 <h2 className="font-display font-bold text-2xl">
-                  {activePlatform ? `Catálogo ${activePlatform}` : 'Catálogo completo'}
+                  {search
+                    ? `Resultados para “${search.trim()}”`
+                    : activePlatform
+                      ? `Catálogo ${activePlatform}`
+                      : 'Catálogo completo'}
                 </h2>
                 {activePlatform && (
                   <button
