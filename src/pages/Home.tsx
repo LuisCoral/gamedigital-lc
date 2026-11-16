@@ -3,6 +3,7 @@ import Header from '../components/Header'
 import CategoryCard from '../components/CategoryCard'
 import ProductGrid from '../components/ProductGrid'
 import Pagination from '../components/Pagination'
+import { matchesSearch } from '../utils/search'
 import PromoBanner from '../components/PromoBanner'
 import FeaturedCarousel from '../components/FeaturedCarousel'
 import Footer from '../components/Footer'
@@ -41,7 +42,7 @@ export default function Home() {
   const filtered = useMemo(() => {
     return products
       .filter((p) => {
-        const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase())
+        const matchesSearch = matchesSearch(p.name, search)
         const matchesPlatform = activePlatform ? p.platform === activePlatform : true
         return matchesSearch && matchesPlatform
       })
